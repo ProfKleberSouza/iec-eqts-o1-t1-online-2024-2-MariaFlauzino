@@ -1,0 +1,283 @@
+{
+	"info": {
+		"_postman_id": "e873d472-7e06-4d7f-b5e2-478c3683b6d4",
+		"name": "Testes de Contrato",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5081653"
+	},
+	"item": [
+		{
+			"name": "Listar usuarios",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Validação da estrutura de resposta - Listagem de Usuários\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an(\"object\");\r",
+							"    pm.expect(jsonData).to.have.property(\"quantidade\").that.is.a(\"number\");\r",
+							"    pm.expect(jsonData).to.have.property(\"usuarios\").that.is.an(\"array\");\r",
+							"   \r",
+							"    \r",
+							"    jsonData.usuarios.forEach(function(usuarios) {\r",
+							"        pm.expect(usuarios).to.be.an(\"object\");\r",
+							"        pm.expect(usuarios).to.have.property(\"nome\").that.is.a(\"string\");\r",
+							"        pm.expect(usuarios).to.have.property(\"email\").that.is.a(\"string\");\r",
+							"        pm.expect(usuarios).to.have.property(\"password\").that.is.a(\"string\");\r",
+							"        pm.expect(usuarios).to.have.property(\"administrador\").that.is.a(\"string\");\r",
+							"        pm.expect(usuarios).to.have.property(\"_id\").that.is.a(\"string\");\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/usuarios",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Listar Carrinhos cadastrados",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+							"const token = pm.collectionVariables.get(\"token\");\r",
+							"const idProduto = pm.collectionVariables.get(\"idProduto\");\r",
+							"\r",
+							"\r",
+							"// Usuario Login\r",
+							"let user = {\r",
+							"   email: \"mariaflauzino@pucminas.br\",\r",
+							"   password: \"pucminas\"\r",
+							"};\r",
+							"\r",
+							"//Produto\r",
+							"let produto = {\r",
+							"     produtos: [\r",
+							"    {\r",
+							"      idProduto: `${idProduto}`,\r",
+							"      quantidade: 8\r",
+							"    }\r",
+							"  ]\r",
+							"}\r",
+							"\r",
+							"// Login request\r",
+							"let loginOptions = {\r",
+							"    url: `${baseUrl}/login`,\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json',\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: 'raw',\r",
+							"        raw: JSON.stringify(user)\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"// Adicionar carrinho request\r",
+							"let carrinhoOptions = {\r",
+							"    url: `${baseUrl}/carrinhos`,\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"        'Content-Type': 'application/json',\r",
+							"        'Authorization': `${token}`\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: 'raw',\r",
+							"        raw: JSON.stringify(produto)\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"login();\r",
+							"\r",
+							"function login()\r",
+							"{\r",
+							"    pm.sendRequest(loginOptions, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error('Erro ao realizar login:', err);\r",
+							"            \r",
+							"        } else {\r",
+							"            console.log('Login com sucesso', res.status, res.json());\r",
+							"\r",
+							"            let responseData = res.json();\r",
+							"            pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+							"            AdicionarCarrinho();\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"function AdicionarCarrinho()\r",
+							"{\r",
+							"    pm.sendRequest(carrinhoOptions, function (err, res) {\r",
+							"        if (err) {\r",
+							"            console.error('Erro ao adicionar carrinho:', err);\r",
+							"        } else {\r",
+							"            console.log('Carrinho adicionado com sucesso:', res.status, res.json());\r",
+							"        }\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code é 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Validação da estrutura de resposta - Listar carrinhos cadastrados\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    var carrinho = jsonData.carrinhos[0];\r",
+							"    var produtos = jsonData.carrinhos[0].produtos;\r",
+							"\r",
+							"    pm.expect(jsonData).to.be.an(\"object\");\r",
+							"    pm.expect(jsonData).to.have.property(\"quantidade\").that.is.a(\"number\");\r",
+							"    pm.expect(jsonData).to.have.property(\"carrinhos\").that.is.a(\"array\");\r",
+							"    pm.expect(jsonData.carrinhos).to.be.an('array').that.has.lengthOf(1);\r",
+							"    pm.expect(carrinho).to.have.property('precoTotal');\r",
+							"    pm.expect(carrinho).to.have.property('quantidadeTotal');\r",
+							"    pm.expect(carrinho).to.have.property('idUsuario');\r",
+							"    pm.expect(carrinho).to.have.property('_id');\r",
+							"    produtos.forEach(function (produto){\r",
+							"        pm.expect(produto).to.have.property('idProduto');\r",
+							"        pm.expect(produto).to.have.property('quantidade');\r",
+							"        pm.expect(produto).to.have.property('precoUnitario');\r",
+							"    });\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "apikey",
+					"apikey": [
+						{
+							"key": "key",
+							"value": "Authorization",
+							"type": "string"
+						},
+						{
+							"key": "value",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/carrinhos",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"carrinhos"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "idCarrinho",
+			"value": "kMadLGenrm4PXTQF",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "idProduto",
+			"value": "K6leHdftCeOJj8BJ",
+			"type": "string"
+		},
+		{
+			"key": "idUsuario",
+			"value": "hPuUEBW261lVLRlo"
+		},
+		{
+			"key": "idUsuarioListar",
+			"value": ""
+		}
+	]
+}

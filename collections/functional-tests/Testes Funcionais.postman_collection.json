@@ -1,0 +1,917 @@
+{
+	"info": {
+		"_postman_id": "789d0548-2a56-4a4b-b77d-9d95d1534bd5",
+		"name": "Testes Funcionais",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5081653"
+	},
+	"item": [
+		{
+			"name": "Excluir Produto Adicionado no Carrinho",
+			"item": [
+				{
+					"name": "Cadastrar produto",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de sucesso\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cadastro realizado com sucesso\");\r",
+									"});\r",
+									"\r",
+									"const resposta = pm.response.json();\r",
+									"pm.collectionVariables.set(\"idProduto\", resposta._id);\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Cadastro de Produto\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação resposta contém Id\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('_id');\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									"const token = pm.collectionVariables.get(\"token\");\r",
+									"const produto = pm.collectionVariables.get(\"idProduto\");\r",
+									"\r",
+									"// Usuario Login\r",
+									"let user = {\r",
+									"   email: \"mariaflauzino@pucminas.br\",\r",
+									"   password: \"pucminas\"\r",
+									"};\r",
+									"\r",
+									"\r",
+									"// Login request\r",
+									"let loginOptions = {\r",
+									"    url: `${baseUrl}/login`,\r",
+									"    method: 'POST',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(user)\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"\r",
+									"login();\r",
+									"\r",
+									"function login()\r",
+									"{\r",
+									"    pm.sendRequest(loginOptions, function (err, res) {\r",
+									"        if (err) {\r",
+									"            console.error('Erro ao realizar login:', err);\r",
+									"            \r",
+									"        } else {\r",
+									"            console.log('Login com sucesso', res.status, res.json());\r",
+									"\r",
+									"            let responseData = res.json();\r",
+									"            pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+									"            setTimeout(function(){}, 2000);\r",
+									"            deleteProduto();\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"function deleteProduto()\r",
+									"{\r",
+									"    pm.sendRequest({\r",
+									"      url: `${baseUrl}/produtos/${produto}`,\r",
+									"      method: 'DELETE',\r",
+									"      header: {\r",
+									"          'Authorization': `${pm.collectionVariables.get(\"token\")}`\r",
+									"          }\r",
+									"        }, (err, res) => {\r",
+									"          if (err) {\r",
+									"              console.error(`Failed to delete object with ID ${produto}:`, err);\r",
+									"          } else {\r",
+									"              console.log(`Successfully deleted object with ID ${produto}:`, res.status);\r",
+									"          }\r",
+									"    });\r",
+									"}\r",
+									"  \r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nome\": \"Sony Monitor HHK23\",\r\n  \"preco\": 1300,\r\n  \"descricao\": \"Monitor\",\r\n  \"quantidade\": 690\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Incluir produto no carrinho",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									"const token = pm.collectionVariables.get(\"token\");\r",
+									"\r",
+									"\r",
+									"// Usuario Login\r",
+									"let user = {\r",
+									"   email: \"mariaflauzino@pucminas.br\",\r",
+									"   password: \"pucminas\"\r",
+									"};\r",
+									"\r",
+									"\r",
+									"// Login request\r",
+									"let loginOptions = {\r",
+									"    url: `${baseUrl}/login`,\r",
+									"    method: 'POST',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(user)\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"//Excluir carrinho\r",
+									"let excluirCarrinhoOptions = {\r",
+									"    url: `${baseUrl}/carrinhos/cancelar-compra`,\r",
+									"    method: 'DELETE',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"        'Authorization': `${token}`\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"login();\r",
+									"\r",
+									"function login()\r",
+									"{\r",
+									"    pm.sendRequest(loginOptions, function (err, res) {\r",
+									"        if (err) {\r",
+									"            console.error('Erro ao realizar login:', err);\r",
+									"            \r",
+									"        } else {\r",
+									"            console.log('Login com sucesso', res.status, res.json());\r",
+									"\r",
+									"            let responseData = res.json();\r",
+									"            pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+									"            setTimeout(function(){}, 2000);\r",
+									"            excluirCarrinho();\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"function excluirCarrinho()\r",
+									"{\r",
+									"    //pm.request.headers.add({ key: 'Authorization', value: `Bearer ${token}` });\r",
+									"    pm.sendRequest(excluirCarrinhoOptions, function (err, res) {\r",
+									"        if (err) {\r",
+									"            console.error('Erro ao excluir carrinho:', err);\r",
+									"        } else {\r",
+									"            // Log response status and body\r",
+									"            console.log('Carrinho excluído com sucesso:', res.status, res.json());\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de sucesso\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cadastro realizado com sucesso\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Cadastrar Carrinho - Cadastro realizado com sucesso\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"    pm.expect(jsonData).to.have.property(\"_id\").that.is.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação Id é alfanumérico\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData._id).to.match(/^[a-zA-Z0-9]+$/);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"produtos\": [\r\n    {\r\n      \"idProduto\": \"{{idProduto}}\",\r\n      \"quantidade\": 8\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir produto que faz parte de carrinho",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de erro\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Não é permitido excluir produto que faz parte de carrinho\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Exclusão de produto com Carrinho\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"    pm.expect(jsonData).to.have.property(\"idCarrinhos\").that.is.a(\"array\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação resposta contém Id do carrinho\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.have.property('idCarrinhos');\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									" const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									" const token = pm.collectionVariables.get(\"token\");\r",
+									" const idProduto = pm.collectionVariables.get(\"idProdutoCarrinho\");\r",
+									"\r",
+									"  // Define the user to be created\r",
+									"  let user = {\r",
+									"      nome: 'Maria Flauzino',\r",
+									"      email: 'mariaflauzino9@pucminas.br',\r",
+									"      password: 'pucminas',\r",
+									"      administrador: 'true'\r",
+									"  };\r",
+									"\r",
+									"   let userLogin = {\r",
+									"      email: 'mariaflauzino7@pucminas.br',\r",
+									"      password: 'pucminas'\r",
+									"  };\r",
+									"\r",
+									"  //Produto\r",
+									" let produto = {\r",
+									"      produtos: [\r",
+									"     {\r",
+									"       idProduto: `${idProduto}`,\r",
+									"       quantidade: 2\r",
+									"     }\r",
+									"   ]\r",
+									" };\r",
+									"\r",
+									"  // Define the request options\r",
+									"  let requestOptions = {\r",
+									"      url: `${baseUrl}/usuarios`,\r",
+									"      method: 'POST',\r",
+									"      header: {\r",
+									"          'Content-Type': 'application/json',\r",
+									"          // Add other headers if needed\r",
+									"      },\r",
+									"      body: {\r",
+									"          mode: 'raw',\r",
+									"          raw: JSON.stringify(user)\r",
+									"      }\r",
+									"  };\r",
+									"\r",
+									"  // Adicionar carrinho request\r",
+									" let carrinhoOptions = {\r",
+									"     url: `${baseUrl}/carrinhos`,\r",
+									"     method: 'POST',\r",
+									"     header: {\r",
+									"         'Content-Type': 'application/json',\r",
+									"         'Authorization': `${token}`\r",
+									"     },\r",
+									"     body: {\r",
+									"         mode: 'raw',\r",
+									"         raw: JSON.stringify(produto)\r",
+									"     }\r",
+									" };\r",
+									"\r",
+									" // Login request\r",
+									" let loginOptions = {\r",
+									"     url: `${baseUrl}/login`,\r",
+									"     method: 'POST',\r",
+									"     header: {\r",
+									"         'Content-Type': 'application/json',\r",
+									"     },\r",
+									"     body: {\r",
+									"         mode: 'raw',\r",
+									"         raw: JSON.stringify(userLogin)\r",
+									"     }\r",
+									" };\r",
+									"\r",
+									" createUser();\r",
+									"\r",
+									"  // Send the request\r",
+									"  function createUser()\r",
+									"  {\r",
+									"     pm.sendRequest(requestOptions, function (err, res) {\r",
+									"         let responseData = res.json();\r",
+									"         if (err) {\r",
+									"             console.error('Error creating user:', err);\r",
+									"         } else if(res.status != \"Bad Request\"){\r",
+									"             // Log response status and body\r",
+									"             console.log('User created successfully:', res.status, res.json());\r",
+									"             // Extract data from the response\r",
+									"            \r",
+									"         }\r",
+									"          login();\r",
+									"     });\r",
+									"  }\r",
+									"\r",
+									" function login()\r",
+									" {\r",
+									"     pm.sendRequest(loginOptions, function (err, res) {\r",
+									"         if (err) {\r",
+									"             console.error('Erro ao realizar login:', err);\r",
+									"           \r",
+									"         } else {\r",
+									"             console.log('Login com sucesso', res.status, res.json());\r",
+									"             let responseData = res.json();\r",
+									"             pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+									"             \r",
+									"             AdicionarCarrinho();\r",
+									"         }\r",
+									"     });\r",
+									" }\r",
+									"\r",
+									" function AdicionarCarrinho()\r",
+									" {\r",
+									"     pm.sendRequest(carrinhoOptions, function (err, res) {\r",
+									"         if (err) {\r",
+									"             console.error('Erro ao adicionar carrinho:', err);\r",
+									"         } else {\r",
+									"             console.log('Carrinho adicionado com sucesso:', res.status, res.json());\r",
+									"            \r",
+									"         }\r",
+									"     });\r",
+									" }\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "value",
+									"value": "{{token}}",
+									"type": "string"
+								},
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/produtos/:idProduto",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos",
+								":idProduto"
+							],
+							"variable": [
+								{
+									"key": "idProduto",
+									"value": "{{idProduto}}"
+								}
+							]
+						},
+						"description": "Não é permitido excluir usuário com carrinho."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Excluir Usuário com Carrinho",
+			"item": [
+				{
+					"name": "Cadastrar usuário",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de sucesso\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cadastro realizado com sucesso\");\r",
+									"});\r",
+									"\r",
+									"const resposta = pm.response.json();\r",
+									"pm.collectionVariables.set(\"idUsuario\", resposta._id);\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Criação de Usuário\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"    pm.expect(jsonData).to.have.property(\"_id\").that.is.a(\"string\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"  const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									"  const idUsuario = pm.collectionVariables.get(\"idUsuario\");\r",
+									"  pm.sendRequest({\r",
+									"      url: `${baseUrl}/usuarios/${idUsuario}`,\r",
+									"      method: 'DELETE',\r",
+									"      header: {\r",
+									"          'Authorization': `Bearer ${pm.collectionVariables.get(\"token\")}`\r",
+									"          }\r",
+									"      }, (err, res) => {\r",
+									"          if (err) {\r",
+									"              console.error(`Failed to delete object with ID ${idUsuario}:`, err);\r",
+									"          } else {\r",
+									"              console.log(`Successfully deleted object with ID ${idUsuario}:`, res.status);\r",
+									"              setTimeout(function(){}, 5000);\r",
+									"          }\r",
+									"      });\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"nome\": \"Maria Flauzino\",\r\n  \"email\": \"mariaflauzino991@pucminas.br\",\r\n  \"password\": \"pucminas\",\r\n  \"administrador\": \"true\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cadastrar Carrinho para usuário",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									"const token = pm.collectionVariables.get(\"token\");\r",
+									"\r",
+									"\r",
+									"// Usuario Login\r",
+									"let user = {\r",
+									"   email: \"mariaflauzino991@pucminas.br\",\r",
+									"   password: \"pucminas\"\r",
+									"};\r",
+									"\r",
+									"\r",
+									"// Login request\r",
+									"let loginOptions = {\r",
+									"    url: `${baseUrl}/login`,\r",
+									"    method: 'POST',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"    },\r",
+									"    body: {\r",
+									"        mode: 'raw',\r",
+									"        raw: JSON.stringify(user)\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"//Excluir carrinho\r",
+									"let excluirCarrinhoOptions = {\r",
+									"    url: `${baseUrl}/carrinhos/cancelar-compra`,\r",
+									"    method: 'DELETE',\r",
+									"    header: {\r",
+									"        'Content-Type': 'application/json',\r",
+									"        'Authorization': `${token}`\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"login();\r",
+									"\r",
+									"function login()\r",
+									"{\r",
+									"    pm.sendRequest(loginOptions, function (err, res) {\r",
+									"        if (err) {\r",
+									"            console.error('Erro ao realizar login:', err);\r",
+									"            \r",
+									"        } else {\r",
+									"            console.log('Login com sucesso', res.status, res.json());\r",
+									"\r",
+									"            let responseData = res.json();\r",
+									"            pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+									"            setTimeout(function(){}, 2000);\r",
+									"            excluirCarrinho();\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"function excluirCarrinho()\r",
+									"{\r",
+									"    //pm.request.headers.add({ key: 'Authorization', value: `Bearer ${token}` });\r",
+									"    pm.sendRequest(excluirCarrinhoOptions, function (err, res) {\r",
+									"        if (err) {\r",
+									"            console.error('Erro ao excluir carrinho:', err);\r",
+									"        } else {\r",
+									"            // Log response status and body\r",
+									"            console.log('Carrinho excluído com sucesso:', res.status, res.json());\r",
+									"            setTimeout(function(){}, 5000);\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de sucesso\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cadastro realizado com sucesso\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Cadastrar Carrinho - Cadastro realizado com sucesso\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"idCarrinho\", jsonData._id);\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"    pm.expect(jsonData).to.have.property(\"_id\").that.is.a(\"string\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "apikey",
+							"apikey": [
+								{
+									"key": "key",
+									"value": "Authorization",
+									"type": "string"
+								},
+								{
+									"key": "value",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"produtos\": [\r\n    {\r\n      \"idProduto\": \"{{idProduto}}\",\r\n      \"quantidade\": 8\r\n    }\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Excluir usuário com carrinho cadastrado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validar mensagem de erro\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Não é permitido excluir usuário com carrinho cadastrado\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Validação da estrutura de resposta - Exclusão de Usuário com Carrinho\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData).to.be.an(\"object\");\r",
+									"    pm.expect(jsonData).to.have.property(\"message\").that.is.a(\"string\");\r",
+									"    pm.expect(jsonData).to.have.property(\"idCarrinho\").that.is.a(\"string\");\r",
+									"});\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									" const baseUrl = pm.collectionVariables.get(\"baseUrl\");\r",
+									" const token = pm.collectionVariables.get(\"token\");\r",
+									"\r",
+									"\r",
+									"let userLogin = {\r",
+									"      email: 'mariaflauzino991@pucminas.br',\r",
+									"      password: 'pucminas'\r",
+									"};\r",
+									"\r",
+									" // Login request\r",
+									" let loginOptions = {\r",
+									"     url: `${baseUrl}/login`,\r",
+									"     method: 'POST',\r",
+									"     header: {\r",
+									"         'Content-Type': 'application/json',\r",
+									"     },\r",
+									"     body: {\r",
+									"         mode: 'raw',\r",
+									"         raw: JSON.stringify(userLogin)\r",
+									"     }\r",
+									" };\r",
+									"\r",
+									"\r",
+									"login();\r",
+									"\r",
+									" function login()\r",
+									" {\r",
+									"     pm.sendRequest(loginOptions, function (err, res) {\r",
+									"         if (err) {\r",
+									"             console.error('Erro ao realizar login:', err);\r",
+									"           \r",
+									"         } else {\r",
+									"             console.log('Login com sucesso', res.status, res.json());\r",
+									"             let responseData = res.json();\r",
+									"             pm.collectionVariables.set(\"token\", responseData.authorization);\r",
+									"             setTimeout(function(){}, 1000);\r",
+									"         }\r",
+									"     });\r",
+									" }\r",
+									"\r",
+									"\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios/:idUsuario",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								":idUsuario"
+							],
+							"variable": [
+								{
+									"key": "idUsuario",
+									"value": "{{idUsuario}}"
+								}
+							]
+						},
+						"description": "Não é permitido excluir usuário com carrinho."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "idProduto",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "idUsuario",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "idCarrinho",
+			"value": ""
+		}
+	]
+}
